@@ -14,13 +14,21 @@ A desktop Battleship game written in C++ using SFML.
 
 - CMake 3.16+
 - A C++17 compiler
-- SFML development libraries (graphics, window, system)
+
+SFML setup is automatic by default. If SFML is not already installed, CMake will fetch it during configure.
+On Linux, SFML still needs system graphics development packages.
 
 ### Ubuntu/Debian
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential cmake libsfml-dev
+sudo apt install -y build-essential cmake libgl1-mesa-dev xorg-dev
+```
+
+Optional (faster configure, use system package instead of fetching):
+
+```bash
+sudo apt install -y libsfml-dev
 ```
 
 ## Build
@@ -28,6 +36,12 @@ sudo apt install -y build-essential cmake libsfml-dev
 ```bash
 cmake -S . -B build
 cmake --build build -j
+```
+
+If you want to disable auto-fetch and require a system-installed SFML:
+
+```bash
+cmake -S . -B build -DBATTLESHIP_FETCH_SFML=OFF
 ```
 
 ## Run
