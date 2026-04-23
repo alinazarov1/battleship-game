@@ -6,9 +6,11 @@ currentShipIndex(0),
 playerScore(0),
 computerScore(0),
 playerTurn(true),
+hoveredCell(-1, -1),
 showingComputerShips(false),
 backgroundWaveOffset(0),
 selectingArsenal(false),
+selectedArsenal(ArsenalType::RADAR),
 attackingWithArsenal(false),
 arsenalAnimationProgress(0),
 waterAnimationTime(0) {
@@ -254,14 +256,6 @@ void Game::update() {
     // Update flying planes
     for (auto& plane : planes) {
         plane.update(deltaTime);
-    }
-
-    // Handle arsenal attack completion
-    if (attackingWithArsenal && arsenalAnimationProgress >= 1.0f) {
-        processArsenalAttack();
-        attackingWithArsenal = false;
-        arsenalAnimationProgress = 0.0f;
-        playerTurn = false; // End turn after special attack
     }
 
     if (currentState == GameState::BATTLE && !playerTurn && !attackingWithArsenal) {
@@ -926,9 +920,11 @@ void Game::drawBoard(int offsetX, int offsetY, int board[BOARD_SIZE][BOARD_SIZE]
 
     // Draw ships after the grid
     if (showShips) {
-        for (const Ship& ship : playerShips) {
+        const std::vector<Ship>& shipsToDraw = (board == playerBoard) ? playerShips : computerShips;
+        for (const Ship& ship : shipsToDraw) {
             if (ship.placed) {
-                drawDoodleShip(ship.x, ship.y, ship.size, ship.horizontal, ship.type, ship.sunk);
+                drawDoodleShip(ship.x, ship.y, ship.size, ship.horizontal, ship.type, ship.sunk,
+                    offsetX, offsetY);
             }
         }
     }
@@ -978,7 +974,8 @@ void Game::restartGame() {
     currentState = GameState::SHIP_PLACEMENT;
 }
 
-void Game::drawDoodleShip(int x, int y, int size, bool horizontal, ShipType type, bool sunk) {
+void Game::drawDoodleShip(int x, int y, int size, bool horizontal, ShipType type, bool sunk,
+    int offsetX, int offsetY) {
     if (texturesLoaded) {
         // Use textures if loaded
         sf::Sprite shipSprite;
@@ -995,8 +992,8 @@ void Game::drawDoodleShip(int x, int y, int size, bool horizontal, ShipType type
         }
 
         // Position on board
-        float posX = BOARD_OFFSET_X + x * CELL_SIZE;
-        float posY = BOARD_OFFSET_Y + y * CELL_SIZE;
+        float posX = offsetX + x * CELL_SIZE;
+        float posY = offsetY + y * CELL_SIZE;
         shipSprite.setPosition(posX, posY);
 
         // Optional: gray out if sunk
@@ -1027,12 +1024,12 @@ void Game::drawDoodleShip(int x, int y, int size, bool horizontal, ShipType type
         for (int i = 0; i < size; i++) {
             sf::RectangleShape shipPart(sf::Vector2f(CELL_SIZE - 2, CELL_SIZE - 2));
             if (horizontal) {
-                shipPart.setPosition(BOARD_OFFSET_X + (x + i) * CELL_SIZE + 1,
-                    BOARD_OFFSET_Y + y * CELL_SIZE + 1);
+                shipPart.setPosition(offsetX + (x + i) * CELL_SIZE + 1,
+                    offsetY + y * CELL_SIZE + 1);
             }
             else {
-                shipPart.setPosition(BOARD_OFFSET_X + x * CELL_SIZE + 1,
-                    BOARD_OFFSET_Y + (y + i) * CELL_SIZE + 1);
+                shipPart.setPosition(offsetX + x * CELL_SIZE + 1,
+                    offsetY + (y + i) * CELL_SIZE + 1);
             }
             shipPart.setFillColor(shipColor);
             window.draw(shipPart);
@@ -1089,7 +1086,7 @@ void Game::drawArsenalMenu() {
 }
 
 void Game::draw3DAnimation(ArsenalType type, sf::Vector2f target) {
-    static float animProgress = 0;
+    float animProgress = arsenalAnimationProgress;
     sf::Vector2f startPos(-100, target.y - 100);
     sf::Vector2f direction = target - startPos;
     float rotation = atan2(direction.y, direction.x) * 180.0f / 3.14159f;
@@ -1219,10 +1216,11 @@ void Game::draw3DAnimation(ArsenalType type, sf::Vector2f target) {
         }
     }
 
-    animProgress += deltaTime * 2.0f;
-    if (animProgress >= 2.0f) {
+    arsenalAnimationProgress += deltaTime * 2.0f;
+    if (arsenalAnimationProgress >= 1.0f) {
         attackingWithArsenal = false;
-        animProgress = 0;
+        arsenalAnimationProgress = 0;
+        playerTurn = false;
 
         // Process the attack
         processArsenalAttack();

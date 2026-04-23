@@ -92,7 +92,8 @@ private:
     void addAdjacentTargets(int x, int y);
     void addEffect(sf::Vector2f pos, sf::Color color, float lifetime);
     void addWave(sf::Vector2f pos, sf::Color color, float maxRadius);
-    void drawDoodleShip(int x, int y, int size, bool horizontal, ShipType type, bool sunk);
+    void drawDoodleShip(int x, int y, int size, bool horizontal, ShipType type, bool sunk,
+        int offsetX = BOARD_OFFSET_X, int offsetY = BOARD_OFFSET_Y);
     void drawBoard(int offsetX, int offsetY, int board[BOARD_SIZE][BOARD_SIZE], bool showShips);
     std::string getCurrentShipName();
     void restartGame();

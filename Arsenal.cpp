@@ -2,12 +2,12 @@
 
 Arsenal::Arsenal(ArsenalType t, int c) : type(t), count(c) {
     if (type == ArsenalType::RADAR) {
-        icon.loadFromFile("radar_icon.png");
+        icon.loadFromFile("assets/radar_icon.png");
     }
     else if (type == ArsenalType::AIRPLANE) {
-        icon.loadFromFile("airplane.png");
+        icon.loadFromFile("assets/airplane.png");
     }
     else {
-        icon.loadFromFile("helicopter_icon.png");
+        icon.loadFromFile("assets/helicopter_icon.png");
     }
 }

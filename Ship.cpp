@@ -25,11 +25,11 @@ type(ShipType::SUBMARINE), shipColor(sf::Color(60, 80, 120)) {
 }
 
 bool Ship::isPartHit(int partIndex) const {
-    return partIndex >= 0 && partIndex < hitParts.size() && hitParts[partIndex];
+    return partIndex >= 0 && partIndex < static_cast<int>(hitParts.size()) && hitParts[partIndex];
 }
 
 void Ship::hitPart(int partIndex) {
-    if (partIndex >= 0 && partIndex < hitParts.size()) {
+    if (partIndex >= 0 && partIndex < static_cast<int>(hitParts.size())) {
         hitParts[partIndex] = true;
         checkIfSunk();
     }
