@@ -1,5 +1,16 @@
 #include "Game.h"
 
+namespace {
+bool loadFirstAvailableFont(sf::Font& font, const std::vector<std::string>& fontPaths) {
+    for (const auto& fontPath : fontPaths) {
+        if (font.loadFromFile(fontPath)) {
+            return true;
+        }
+    }
+    return false;
+}
+}
+
 Game::Game() : window(sf::VideoMode(1200, 900), "Battleship"),
 currentState(GameState::MENU),
 currentShipIndex(0),
@@ -18,8 +29,12 @@ waterAnimationTime(0) {
     srand(static_cast<unsigned int>(time(nullptr)));
 
     // Load fonts
-    if (!font.loadFromFile("assets/arial.ttf")) {
-        std::cout << "Warning: Could not load arial.ttf, using default font\n";
+    if (!loadFirstAvailableFont(font, {
+            "assets/arial.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf"
+        })) {
+        std::cout << "Warning: Could not load a font file, text may not render\n";
     }
     titleFont = font;
 
